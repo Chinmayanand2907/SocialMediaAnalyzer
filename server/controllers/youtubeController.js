@@ -85,8 +85,11 @@ const analyzeChannel = async (req, res, next) => {
       return res.status(400).json({ message: 'channelId is required' });
     }
 
-    const channelDetails = await fetchChannelDetails(channelId);
-    const videoIds = await fetchLatestVideoIds(channelId);
+    // Normalize channelId - remove UC prefix if user included it
+    const normalizedChannelId = channelId.startsWith('UC') ? channelId : `UC${channelId}`;
+
+    const channelDetails = await fetchChannelDetails(normalizedChannelId);
+    const videoIds = await fetchLatestVideoIds(normalizedChannelId);
     const videos = await fetchVideoStats(videoIds);
 
     if (!videos.length) {
@@ -97,7 +100,7 @@ const analyzeChannel = async (req, res, next) => {
       videos.reduce((sum, video) => sum + video.engagementRate, 0) / videos.length;
 
     const report = await Analysis.create({
-      channelId,
+      channelId: normalizedChannelId,
       channelTitle: channelDetails.title,
       totalSubscribers: channelDetails.subscribers,
       channelEngagementRate: Number(channelEngagementRate.toFixed(2)),
@@ -106,10 +109,52 @@ const analyzeChannel = async (req, res, next) => {
 
     return res.status(200).json(report);
   } catch (error) {
+    // Log error for debugging
+    console.error('Error analyzing channel:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      reason: error.response?.data?.error?.errors?.[0]?.reason,
+      channelId: req.body?.channelId,
+    });
+
+    // Handle database errors
     if (error.errors) {
       return res.status(500).json({ message: 'Database error', details: error.message });
     }
-    return next(error);
+
+    // Handle YouTube API errors
+    if (error.response) {
+      const status = error.response.status;
+      const errorData = error.response.data?.error || {};
+      const reason = errorData.errors?.[0]?.reason || '';
+      const message = errorData.message || error.message || 'YouTube API error';
+
+      // Map common YouTube API errors to user-friendly messages
+      let userMessage = message;
+      if (reason === 'quotaExceeded') {
+        userMessage = 'YouTube API quota exceeded. Please try again later.';
+      } else if (reason === 'keyInvalid') {
+        userMessage = 'Invalid YouTube API key. Please contact support.';
+      } else if (reason === 'channelNotFound' || message.includes('not found')) {
+        userMessage = 'Channel not found. Please check the Channel ID.';
+      } else if (status === 403) {
+        userMessage = 'Access denied. The channel may be private or the API key lacks permissions.';
+      } else if (status === 400) {
+        userMessage = 'Invalid request. Please check the Channel ID format.';
+      }
+
+      return res.status(status || 500).json({ message: userMessage });
+    }
+
+    // Handle network errors
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      return res.status(503).json({ message: 'Unable to connect to YouTube API. Please try again later.' });
+    }
+
+    // Handle other errors
+    const errorMessage = error.message || 'Failed to analyze channel';
+    return res.status(500).json({ message: errorMessage });
   }
 };
 

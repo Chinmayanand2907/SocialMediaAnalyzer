@@ -21,31 +21,62 @@ if (!process.env.MONGO_URI) {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database
-connectDB();
+// Start server after database connection
+const startServer = async () => {
+  try {
+    // Connect to database first
+    console.log('🔄 Connecting to MongoDB...');
+    await connectDB();
+    
+    // Middleware
+    app.use(cors({ 
+      origin: process.env.CLIENT_URL || '*', 
+      optionsSuccessStatus: 200,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    }));
+    app.use(express.json({ limit: '1mb' }));
+    app.use(express.urlencoded({ extended: true }));
+    app.use(morgan('dev'));
 
-// Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || '*', optionsSuccessStatus: 200 }));
-app.use(express.json({ limit: '1mb' }));
-app.use(morgan('dev'));
+    // Health check endpoint
+    app.get('/health', (_req, res) => {
+      res.status(200).json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    });
 
-// Routes
-app.use('/api', youtubeRoutes);
+    // Routes
+    app.use('/api', youtubeRoutes);
 
-app.get('/', (_req, res) => {
-  res.json({ message: 'YouTube Engagement Analyzer API' });
-});
+    app.get('/', (_req, res) => {
+      res.json({ message: 'YouTube Engagement Analyzer API' });
+    });
 
-// Error handler
-app.use((err, _req, res, _next) => {
-  console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({
-    message: err.message || 'Server error',
-  });
-});
+    // Error handler
+    app.use((err, _req, res, _next) => {
+      console.error(err);
+      const status = err.status || 500;
+      res.status(status).json({
+        message: err.message || 'Server error',
+      });
+    });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`📍 API endpoint: http://localhost:${PORT}/api`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+// Start the application
+startServer();
 

@@ -24,8 +24,13 @@ const AnalyzeForm = ({ onAnalyze, isLoading }) => {
   });
 
   const submitHandler = (values) => {
-    onAnalyze(values.channelId.trim());
-    reset({ channelId: values.channelId.trim() });
+    let channelId = values.channelId.trim();
+    // Remove UC prefix if user pasted the full channel ID
+    if (channelId.startsWith('UC')) {
+      channelId = channelId.substring(2);
+    }
+    onAnalyze(channelId);
+    reset({ channelId: '' });
   };
 
   return (
