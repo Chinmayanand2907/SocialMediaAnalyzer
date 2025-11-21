@@ -10,6 +10,8 @@ import {
   VStack,
   Button,
   Tooltip,
+  Badge,
+  HStack,
 } from '@chakra-ui/react';
 import { MdHistory, MdOutlineNorthEast } from 'react-icons/md';
 
@@ -45,8 +47,15 @@ const HistoryPanel = ({ history, onSelect }) => {
                 borderColor="gray.700"
                 _hover={{ bg: 'gray.700' }}
               >
-                <Flex direction="column" align="flex-start">
-                  <Text fontWeight="semibold">{entry.channelTitle}</Text>
+                <Flex direction="column" align="flex-start" flex={1}>
+                  <HStack justify="space-between" w="full">
+                    <Text fontWeight="semibold">{entry.channelTitle}</Text>
+                    {entry.userId && (
+                      <Badge colorScheme="blue" size="sm">
+                        {entry.userId.username || 'User'}
+                      </Badge>
+                    )}
+                  </HStack>
                   <Text fontSize="sm" color="gray.400">
                     {new Date(entry.createdAt).toLocaleString()}
                   </Text>

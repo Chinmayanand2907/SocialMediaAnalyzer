@@ -23,6 +23,17 @@ const analysisSchema = new mongoose.Schema(
       type: [videoStatsSchema],
       default: [],
     },
+    // Optional user association
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    // Track if analysis is public or private
+    isPublic: {
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true }
 );
