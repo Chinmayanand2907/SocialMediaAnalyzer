@@ -69,8 +69,8 @@ const VideoCharts = ({ videos }) => {
         </CardHeader>
         <CardBody minH="320px">
           {hasViewData ? (
-            <Box w="100%" h="260px">
-              <ResponsiveContainer width="100%" height="100%">
+            <Box w="100%" h="280px" minW="300px">
+              <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={280}>
                 <BarChart data={viewsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="name" stroke="#cbd5f5" hide />
@@ -102,8 +102,8 @@ const VideoCharts = ({ videos }) => {
         </CardHeader>
         <CardBody minH="320px">
           {hasEngagementData ? (
-            <Box w="100%" h="260px">
-              <ResponsiveContainer width="100%" height="100%">
+            <Box w="100%" h="280px" minW="300px">
+              <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={280}>
                 <PieChart>
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #4a5568' }}
