@@ -1,119 +1,220 @@
-# YouTube Engagement Analyzer (MERN)
+# YouTube Engagement Analyzer
 
-A full-stack analytics dashboard that evaluates the latest performance metrics for any public YouTube channel. Paste a channel ID to retrieve subscribers, calculate engagement KPIs, visualize recent video stats, and store historical reports.
+A full-stack MERN application that provides comprehensive analytics for YouTube channels. Features user authentication, channel analysis, data visualization, and historical tracking of engagement metrics.
 
-## Tech Stack
+## ✨ Features
 
-- **Frontend:** React + Vite, Chakra UI, Recharts, Axios
-- **Backend:** Node.js, Express, Mongoose, @googleapis/youtube
-- **Database:** MongoDB (Atlas or local)
+### 🔐 Authentication System
+- User registration and login with JWT tokens
+- Secure password hashing with bcryptjs
+- Protected routes and optional authentication
+- Profile management with password change functionality
+- Persistent sessions with automatic token validation
 
-## Project Structure
+### 📊 YouTube Analytics
+- **Channel Analysis**: Analyze any public YouTube channel by Channel ID
+- **Engagement Metrics**: Calculate engagement rates for channels and individual videos
+- **Video Statistics**: Fetch and display views, likes, comments, and publish dates
+- **Subscriber Tracking**: Display current subscriber counts and channel metadata
+- **Historical Data**: Save and retrieve previous analysis reports
+
+### 🎨 Modern UI/UX
+- **Responsive Design**: Mobile-first approach with Chakra UI components
+- **Dark Theme**: Consistent dark theme throughout the application
+- **Interactive Charts**: Data visualization with Recharts (bar charts, donut charts)
+- **Smooth Animations**: Framer Motion animations for enhanced user experience
+- **Loading States**: Full-screen loading overlays with progress indicators
+- **Toast Notifications**: Real-time feedback for user actions
+
+### 🚀 Technical Features
+- **Real-time Updates**: Live data fetching from YouTube Data API v3
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+- **API Retry Logic**: Automatic retry for failed network requests
+- **Server Health Monitoring**: Frontend checks backend availability
+- **Secure API**: Backend-only YouTube API key exposure
+- **Data Persistence**: MongoDB storage for users and analysis reports
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 19** - Modern React with hooks and context
+- **Vite** - Fast build tool and dev server
+- **Chakra UI** - Component library with dark theme support
+- **React Router DOM** - Client-side routing
+- **Axios** - HTTP client with interceptors
+- **Recharts** - Data visualization library
+- **Framer Motion** - Animation library
+- **React Hook Form** - Form validation and management
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express 5** - Web application framework
+- **MongoDB** - NoSQL database with Mongoose ODM
+- **JWT** - JSON Web Token authentication
+- **bcryptjs** - Password hashing
+- **YouTube Data API v3** - Google's YouTube API
+- **CORS** - Cross-origin resource sharing
+- **Morgan** - HTTP request logger
+
+## 📁 Project Structure
 
 ```
-client/   # React single-page app for input + visualization
-server/   # Express REST API + MongoDB persistence
+├── client/                 # React frontend application
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── contexts/       # React context providers
+│   │   ├── pages/          # Page components
+│   │   ├── services/       # API service functions
+│   │   ├── theme/          # Theme configuration
+│   │   └── App.jsx         # Main application component
+│   ├── public/             # Static assets
+│   └── package.json        # Frontend dependencies
+├── server/                 # Node.js backend application
+│   ├── config/             # Database configuration
+│   ├── controllers/        # Route handlers
+│   ├── middleware/         # Custom middleware
+│   ├── models/             # MongoDB schemas
+│   ├── routes/             # API routes
+│   └── server.js           # Express server setup
+├── README.md               # Project documentation
+└── .gitignore             # Git ignore rules
 ```
 
-## Prerequisites
+## 🚀 Getting Started
 
-- Node.js 18+
-- npm
-- MongoDB instance/cluster
-- YouTube Data API v3 key
+### Prerequisites
+- Node.js 18+ and npm
+- MongoDB instance (local or MongoDB Atlas)
+- YouTube Data API v3 key from Google Cloud Console
 
-## Environment Variables
+### Environment Setup
 
-Copy the sample files and fill in your secrets:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd SocialMedia
+   ```
 
-```
-cp server/env.example server/.env
-cp client/env.example client/.env
-```
+2. **Install dependencies**
+   ```bash
+   # Install backend dependencies
+   cd server && npm install
+   
+   # Install frontend dependencies
+   cd ../client && npm install
+   ```
 
-`server/.env`
+3. **Environment Variables**
+   
+   Create `server/.env`:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   YOUTUBE_API_KEY=your_youtube_data_api_key
+   JWT_SECRET=your_jwt_secret_key
+   CLIENT_URL=http://localhost:5173
+   ```
+   
+   Create `client/.env`:
+   ```env
+   VITE_API_BASE_URL=http://localhost:5000/api
+   ```
 
-```
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-YOUTUBE_API_KEY=your_youtube_data_api_key
-CLIENT_URL=http://localhost:5173
-```
+### Running the Application
 
-`client/.env`
+1. **Start the backend server**
+   ```bash
+   cd server
+   npm run dev
+   ```
+   Server runs on `http://localhost:5000`
 
-```
-VITE_API_BASE_URL=http://localhost:5000/api
-```
+2. **Start the frontend development server**
+   ```bash
+   cd client
+   npm run dev
+   ```
+   Client runs on `http://localhost:5173`
 
-> Only the backend knows the YouTube API key. The React app calls the Express API, which proxies all YouTube requests securely.
+3. **Access the application**
+   Open `http://localhost:5173` in your browser
 
-## Getting Started
+## 🔧 API Endpoints
 
-Install dependencies:
+### Authentication Routes (`/api/auth/`)
+- `POST /register` - Create new user account
+- `POST /login` - User login with credentials
+- `POST /logout` - User logout (protected)
+- `GET /me` - Get current user information (protected)
+- `PUT /profile` - Update user profile (protected)
+- `PUT /change-password` - Change user password (protected)
 
-```bash
-cd server && npm install
-cd ../client && npm install
-```
+### YouTube Analytics Routes (`/api/`)
+- `POST /analyze/channel` - Analyze YouTube channel (optional auth)
+  - Body: `{ "channelId": "UCxxxxxxxx" }`
+  - Returns: Channel metadata, engagement metrics, video statistics
+- `GET /history` - Get analysis history (optional auth)
+  - Returns: Up to 20 recent analysis reports
 
-Run the backend:
+## 🎯 Usage
 
-```bash
-cd server
-npm run dev
-```
+### For Guest Users
+1. Visit the dashboard at `http://localhost:5173/dashboard`
+2. Enter a YouTube Channel ID (without the "UC" prefix)
+3. Click "Analyze Channel" to get instant engagement metrics
+4. View public analysis history
 
-Run the frontend:
+### For Registered Users
+1. Sign up for a free account or log in
+2. Analyze channels with automatic saving to your account
+3. Access your personal analysis history
+4. Manage your profile and account settings
 
-```bash
-cd client
-npm run dev
-```
+### Getting YouTube Channel IDs
+- Visit any YouTube channel
+- Look at the URL: `youtube.com/channel/UCxxxxxxxxx`
+- Copy the part after "UC" (e.g., if the ID is "UCBJycsmduvYEL83R_U4JriQ", enter "BJycsmduvYEL83R_U4JriQ")
 
-Visit `http://localhost:5173`.
+## 🔒 Security Features
 
-## API Reference
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: bcryptjs for secure password storage
+- **API Key Protection**: YouTube API key only accessible from backend
+- **CORS Configuration**: Controlled cross-origin requests
+- **Input Validation**: Server-side validation for all inputs
+- **Error Handling**: Secure error messages without sensitive data exposure
 
-### `POST /api/analyze/channel`
+## 🚀 Deployment
 
-Body: `{ "channelId": "UCxxxxxxxx" }`
+### Backend Deployment
+1. Set up MongoDB Atlas or your preferred MongoDB hosting
+2. Deploy to platforms like Render, Railway, or Heroku
+3. Configure environment variables in your hosting platform
+4. Update `CLIENT_URL` to your frontend domain
 
-Steps performed:
+### Frontend Deployment
+1. Build the production version: `npm run build`
+2. Deploy to Vercel, Netlify, or similar platforms
+3. Update `VITE_API_BASE_URL` to your backend domain
 
-1. Fetch channel metadata & subscriber count (`channels.list`).
-2. Fetch latest uploads (10) via `search.list`.
-3. Fetch statistics for those videos (`videos.list`).
-4. Compute each video’s engagement rate and an averaged channel engagement rate.
-5. Persist the report in MongoDB and return it to the client.
+## 🤝 Contributing
 
-### `GET /api/history`
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Open a pull request
 
-Returns up to 20 saved reports (latest first) to quickly reload previous analyses.
+## 📝 License
 
-## Frontend UX Highlights
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- Chakra UI layout with responsive KPI cards and charts.
-- Recharts bar chart for recent video views (sorted by publish date).
-- Donut chart comparing aggregate likes vs. comments.
-- Tabular breakdown of the latest 10 videos, including per-video engagement.
-- History panel to reload prior reports.
-- Full-screen loading overlay with optimistic toast notifications.
+## 🙏 Acknowledgments
 
-## Testing & Validation
+- YouTube Data API v3 for providing channel and video data
+- Chakra UI for the beautiful component library
+- The React and Node.js communities for excellent documentation and support
 
-- Uses Vite dev server for hot reloading.
-- All API calls proxy through Axios with configurable `VITE_API_BASE_URL`.
-- Server enforces required env vars and gracefully handles YouTube API errors.
+---
 
-## Next Steps / Ideas
-
-- Add pagination + filters on history.
-- Cache YouTube responses to reduce quota usage.
-- Add auth and team workspaces for agencies.
-- Streamline CI/CD deployment instructions (Render, Vercel, etc.).
-
-## License
-
-MIT © 2025
-
+**Built with ❤️ using the MERN stack**

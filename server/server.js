@@ -2,11 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
 const connectDB = require('./config/db');
 const youtubeRoutes = require('./routes/youtubeRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 if (!process.env.YOUTUBE_API_KEY) {
   console.error('Missing YOUTUBE_API_KEY in environment variables.');
@@ -38,6 +40,7 @@ const startServer = async () => {
     }));
     app.use(express.json({ limit: '1mb' }));
     app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
     app.use(morgan('dev'));
 
     // Health check endpoint
@@ -50,6 +53,7 @@ const startServer = async () => {
     });
 
     // Routes
+    app.use('/api/auth', authRoutes);
     app.use('/api', youtubeRoutes);
 
     app.get('/', (_req, res) => {

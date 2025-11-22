@@ -1,4 +1,5 @@
 const Analysis = require('../models/Analysis');
+const User = require('../models/User');
 
 const { youtube } = require('@googleapis/youtube');
 
@@ -99,13 +100,20 @@ const analyzeChannel = async (req, res, next) => {
     const channelEngagementRate =
       videos.reduce((sum, video) => sum + video.engagementRate, 0) / videos.length;
 
-    const report = await Analysis.create({
+    const analysisData = {
       channelId: normalizedChannelId,
       channelTitle: channelDetails.title,
       totalSubscribers: channelDetails.subscribers,
       channelEngagementRate: Number(channelEngagementRate.toFixed(2)),
       videos,
-    });
+    };
+
+    // Associate with user if authenticated
+    if (req.user) {
+      analysisData.userId = req.user.id;
+    }
+
+    const report = await Analysis.create(analysisData);
 
     return res.status(200).json(report);
   } catch (error) {
@@ -160,7 +168,26 @@ const analyzeChannel = async (req, res, next) => {
 
 const getHistory = async (req, res, next) => {
   try {
-    const history = await Analysis.find().sort({ createdAt: -1 }).limit(20);
+    let query = {};
+    
+    // If user is authenticated, show their analyses + public ones
+    // If not authenticated, show only public analyses
+    if (req.user) {
+      query = {
+        $or: [
+          { userId: req.user.id },
+          { isPublic: true }
+        ]
+      };
+    } else {
+      query = { isPublic: true };
+    }
+
+    const history = await Analysis.find(query)
+      .populate('userId', 'username firstName lastName')
+      .sort({ createdAt: -1 })
+      .limit(20);
+    
     return res.status(200).json(history);
   } catch (error) {
     return next(error);
